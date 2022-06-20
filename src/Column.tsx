@@ -15,10 +15,24 @@ type ColumnProps = {
 export const Column = ({ text, index, id }: ColumnProps) => {
   const { state, dispatch } = useAppState()
   const ref = useRef<HTMLDivElement>(null)
+  const [, drop] = useDrop({
+    accept: "COLUMN",
+    hover(item: any) {
+      const dragIndex = item[0].index
+      const hoverIndex = index
+      if (dragIndex === hoverIndex) {
+        return
+      }
+
+      dispatch({ type: "MOVE_LIST", payload: { dragIndex, hoverIndex } })
+      item[0].index = hoverIndex
+    }
+  })
 
   const { drag } = useItemDrag({ type: "COLUMN", id, index, text })
 
-  drag(ref)
+  drag(drop(ref))
+ 
 
   return (
     <ColumnContainer ref={ref}>

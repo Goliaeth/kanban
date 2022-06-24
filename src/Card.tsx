@@ -21,7 +21,7 @@ export const Card = ({ text, id, index, columnId, isPreview }: CardProps) => {
   const { drag } = useItemDrag({ type: "CARD", id, index, text, columnId })
   const [, drop] = useDrop({
     accept: "CARD",
-    hover(item: any) {
+    hover(item: CardDragItem[]) {
       if (item[0].id === id) {
         return
       }

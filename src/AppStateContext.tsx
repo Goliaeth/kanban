@@ -9,6 +9,7 @@ import {
 } from "./utils/arrayUtils"
 import { DragItem } from "./DragItem"
 import { save } from "./api"
+import { withInitialState } from "./withInitialState"
 
 type Task = {
   id: string
@@ -56,19 +57,26 @@ const AppStateContext = createContext<AppStateContextProps>(
   {} as AppStateContextProps
 )
 
-export const AppStateProvider = ({ children }: React.PropsWithChildren<{}>) => {
-  const [state, dispatch] = useReducer(AppStateReducer, AppData)
-
-  useEffect(() => {
-    save(state)
-  }, [state])
-
-  return (
-    <AppStateContext.Provider value={{ state, dispatch }}>
-      {children}
-    </AppStateContext.Provider>
-  )
+type AppStateProviderProps = {
+  children: React.ReactNode
+  initialState: AppState
 }
+
+export const AppStateProvider = withInitialState<AppStateProviderProps>(
+  ({ children, initialState }) => {
+    const [state, dispatch] = useReducer(appStateReducer, initialState)
+
+    useEffect(() => {
+      save(state)
+    }, [state])
+
+    return (
+      <AppStateContext.Provider value={{ state, dispatch }}>
+        {children}
+      </AppStateContext.Provider>
+    )
+  }
+)
 
 export const useAppState = () => {
   return useContext(AppStateContext)
@@ -107,7 +115,7 @@ type Action =
       payload: DragItem | undefined
     }
 
-const AppStateReducer = (state: AppState, action: Action): AppState => {
+const appStateReducer = (state: AppState, action: Action): AppState => {
   switch (action.type) {
     case "ADD_LIST": {
       return {
